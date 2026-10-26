@@ -3,6 +3,8 @@
 **Hold a key. Speak. Clean text appears in any app.**
 Free, open source, and 100 % local. No account, no subscription, no audio leaves your PC.
 
+▶ **[Watch the 40-second intro](https://github.com/LeanderKY/opendictate/releases/download/v1.0/opendictate-intro.mp4)** · [Download v1.0](https://github.com/LeanderKY/opendictate/releases/tag/v1.0)
+
 OpenDictate is a voice-dictation tool for Windows in the spirit of Wispr Flow and Superwhisper. It uses Whisper for speech recognition and a small local language model to turn how you *speak* into how you'd *write*: filler words go, self-corrections resolve, lists become lists.
 
 > „Ich treff mich morgen, nein, übermorgen mit Anna“ → **„Ich treffe mich übermorgen mit Anna.“**

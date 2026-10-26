@@ -1,0 +1,13 @@
+# Persönliche Daten: Einstellungen, Beispiele, Verlauf
+data/
+
+__pycache__/
+*.pyc
+.venv/
+
+# Video-Renderings (groß, gehören in die Releases, nicht ins Repo)
+video/out/
+video/frames/
+
+# Alte, nicht verwendete Sprachaufnahme
+video/voiceover-casual.mp3

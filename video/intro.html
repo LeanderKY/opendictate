@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenDictate Intro</title>
+<style>
+  :root {
+    --bg: #000;
+    --text: #f5f5f7;
+    --muted: #86868b;
+    --dim: #48484a;
+    --rec: #ff453a;
+    --ok: #30d158;
+    --display: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    --mono: "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  body { color: var(--text); font-family: var(--display); -webkit-font-smoothing: antialiased; }
+  .layer { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+  .huge { font-size: 168px; font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
+  .big { font-size: 112px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; }
+  .mid { font-size: 64px; font-weight: 600; letter-spacing: -0.03em; }
+  .sub { font-size: 40px; font-weight: 500; color: var(--muted); letter-spacing: -0.01em; }
+  .w { display: inline-block; will-change: transform, opacity; }
+
+  /* Szene 2: Rohtext räumt sich auf */
+  #raw { font-family: var(--mono); font-size: 46px; color: var(--muted); white-space: nowrap; margin-top: 56px; }
+  #raw .w { margin-right: 0.6ch; overflow: hidden; vertical-align: bottom; }
+  #raw .x { color: var(--muted); }
+  #clean { position: absolute; font-size: 76px; font-weight: 600; letter-spacing: -0.03em; top: 560px; }
+
+  /* Szene 4: App-Demo */
+  .win {
+    width: 1160px; height: 600px; border-radius: 22px; background: #1c1c1e;
+    box-shadow: 0 0 0 1px #2c2c2e, 0 40px 120px rgba(0,0,0,.6);
+    display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+  .win-bar { height: 52px; border-bottom: 1px solid #2c2c2e; display: flex; align-items: center; padding: 0 22px; gap: 9px; }
+  .win-bar i { width: 13px; height: 13px; border-radius: 50%; background: #3a3a3c; }
+  .win-bar span { margin-left: 16px; color: var(--muted); font-size: 21px; font-family: "Segoe UI", sans-serif; }
+  .chat { flex: 1; padding: 34px 40px; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; font-family: "Segoe UI", sans-serif; }
+  .bubble { align-self: flex-start; background: #2c2c2e; color: var(--text); padding: 15px 22px; border-radius: 22px; font-size: 27px; max-width: 70%; }
+  .bubble.me { align-self: flex-end; background: #0a84ff; }
+  .input { margin: 0 28px 28px; height: 74px; border-radius: 37px; background: #2c2c2e; display: flex; align-items: center; padding: 0 30px; font-size: 27px; font-family: "Segoe UI", sans-serif; color: var(--text); }
+  .input .ph { color: #636366; }
+  .caret { display: inline-block; width: 2px; height: 32px; background: #0a84ff; margin-left: 2px; vertical-align: middle; }
+  #said { position: absolute; top: 120px; font-size: 38px; color: var(--muted); font-style: italic; font-weight: 400; }
+  .key {
+    position: absolute; bottom: 70px; left: 120px; width: 250px; height: 96px; border-radius: 18px;
+    background: #2c2c2e; box-shadow: 0 8px 0 #111, 0 0 0 1px #3a3a3c inset;
+    display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 500; color: var(--text);
+  }
+  .pill {
+    position: absolute; bottom: 92px; left: 50%; width: 300px; height: 60px; margin-left: -150px; border-radius: 30px;
+    background: #1c1c1e; box-shadow: 0 0 0 1px #3a3a3c; display: flex; align-items: center; padding: 0 24px; gap: 14px;
+    font-size: 22px; font-family: "Segoe UI", sans-serif;
+  }
+  .pill .rec { width: 14px; height: 14px; flex: none; border-radius: 50%; background: var(--rec); }
+  .bars { display: flex; align-items: center; gap: 4px; height: 36px; margin-left: auto; }
+  .bars b { width: 4px; border-radius: 2px; background: var(--text); }
+  #timer { position: absolute; bottom: 110px; right: 160px; font-size: 30px; color: var(--ok); font-variant-numeric: tabular-nums; font-family: "Segoe UI", sans-serif; }
+
+  /* Szene 7: Beibringen */
+  .teach { width: 1480px; font-family: "Segoe UI", sans-serif; margin-top: 60px; }
+  .teach-row { display: grid; grid-template-columns: 1.25fr 80px 1fr; align-items: center; padding: 26px 0; border-top: 1px solid #2c2c2e; }
+  .teach-row .said { font-family: var(--mono); font-size: 27px; color: var(--muted); white-space: nowrap; }
+  .teach-row .arrow { color: var(--dim); font-size: 34px; text-align: center; }
+  .teach-row .out { font-size: 32px; }
+
+  .url { font-size: 34px; color: var(--muted); margin-top: 34px; letter-spacing: 0; font-weight: 400; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<div class="layer" id="s1">
+  <div class="huge"><span class="w" id="s1a">You talk.</span> <span class="w" id="s1b" style="color:var(--muted)">It types.</span></div>
+</div>
+
+<!-- 2 -->
+<div class="layer" id="s2">
+  <div class="mid" id="s2t">But nobody talks the way they type.</div>
+  <div id="raw"></div>
+  <div id="clean">I'm meeting Anna on Friday.</div>
+</div>
+
+<!-- 3 -->
+<div class="layer" id="s3">
+  <div class="sub" id="s3a">Welcome to</div>
+  <div class="huge" id="s3b" style="margin-top:22px">OpenDictate</div>
+</div>
+
+<!-- 4 -->
+<div class="layer" id="s4">
+  <div id="said"></div>
+  <div class="win" id="win">
+    <div class="win-bar"><i></i><i></i><i></i><span>Messages</span></div>
+    <div class="chat" id="chat">
+      <div class="bubble">ready for tonight?</div>
+      <div class="bubble me" id="sent" style="opacity:0">Yo, what's up in the hood?</div>
+    </div>
+    <div class="input" id="input"><span class="ph">Message</span><span class="caret" id="caret"></span></div>
+  </div>
+  <div class="key" id="key">Right Ctrl</div>
+  <div class="pill" id="pill"><span class="rec" id="pdot"></span><span id="plabel">Recording</span><span class="bars" id="bars"></span></div>
+  <div id="timer"></div>
+</div>
+
+<!-- 5 -->
+<div class="layer" id="s5">
+  <div class="sub" id="s5c" style="margin-bottom:18px">As fast as</div>
+  <div class="huge" id="s5a" style="font-variant-numeric: tabular-nums">0.2 s</div>
+  <div class="sub" id="s5b" style="margin-top:28px; text-align:center; line-height:1.4">Clean sentences skip the AI entirely.<br>Messy ones take about half a second.</div>
+</div>
+
+<!-- 6 -->
+<div class="layer" id="s6">
+  <div class="big w" id="s6a">Runs on your PC.</div>
+  <div class="big w" id="s6b" style="color:var(--muted)">No account. No subscription.</div>
+  <div class="big w" id="s6c" style="color:var(--muted)">Free for everyone.</div>
+</div>
+
+<!-- 7 -->
+<div class="layer" id="s7">
+  <div class="big" id="s7a">It learns the way you write.</div>
+  <div class="teach">
+    <div class="teach-row" id="t1"><span class="said">yo what's up yo what's up in the hood</span><span class="arrow">→</span><span class="out">Yo, what's up in the hood?</span></div>
+    <div class="teach-row" id="t2"><span class="said">send it to paul sorry to pete</span><span class="arrow">→</span><span class="out">Send it to Pete.</span></div>
+    <div class="teach-row" id="t3"><span class="said">we need first milk second eggs</span><span class="arrow">→</span><span class="out">We need:<br>1. Milk<br>2. Eggs</span></div>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="layer" id="s8">
+  <div class="huge" id="s8a">OpenDictate</div>
+  <div class="sub" id="s8b" style="margin-top:48px">Free and open source.</div>
+  <div class="url" id="s8c">github.com/LeanderKY/opendictate</div>
+</div>
+
+<script>
+"use strict";
+// Alles wird aus der Zeit t (Sekunden) berechnet – so ist jedes Bild beim Rendern exakt reproduzierbar.
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const easeOut = x => 1 - Math.pow(1 - x, 4);          // weich auslaufend
+const easeInOut = x => x < .5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2;
+const p = (t, start, dur) => clamp((t - start) / dur);
+// Ein- und Ausblenden einer Ebene
+const vis = (t, a, b, fade = .5) => Math.min(easeOut(p(t, a, fade)), 1 - easeInOut(p(t, b - fade, fade)));
+
+function rise(el, t, start, dur = .9, dist = 40) {
+  const k = easeOut(p(t, start, dur));
+  el.style.opacity = k;
+  el.style.transform = `translateY(${(1 - k) * dist}px)`;
+  el.style.filter = `blur(${(1 - k) * 8}px)`;
+}
+
+// Szene 2: Wörter des Rohtexts; x = fliegt raus
+const RAW = [["um", 1], ["so", 1], ["I'm", 0], ["meeting", 0], ["Anna", 0], ["tomorrow,", 1], ["no", 1], ["wait,", 1], ["on", 0], ["Friday", 0]];
+const raw = $("raw");
+RAW.forEach(([w, x]) => raw.append(Object.assign(document.createElement("span"), { className: "w" + (x ? " x" : ""), textContent: w })));
+const rawSpans = [...raw.children];
+const rawWidths = rawSpans.map(s => s.getBoundingClientRect().width);
+
+const bars = $("bars");
+for (let i = 0; i < 16; i++) bars.append(document.createElement("b"));
+const noise = (i, t) => Math.abs(Math.sin(i * 12.9898 + Math.floor(t * 14) * 78.233) * 43758.5453 % 1);
+
+const SAID = "yo what's up… yo what's up in the hood";
+const DURATION = 40;
+
+// Zeiten passen zur Sprachaufnahme (voiceover.mp3 startet bei VO_OFFSET).
+const VO_OFFSET = 0.5;
+
+function seek(t) {
+  // 1 · „You talk. It types.“
+  $("s1").style.opacity = vis(t, 0.1, 3.4);
+  rise($("s1a"), t, 0.4);
+  rise($("s1b"), t, 1.6);
+
+  // 2 · „But nobody talks the way they type. Every um. Every second thought.“
+  $("s2").style.opacity = vis(t, 3.4, 11.2);
+  rise($("s2t"), t, 3.4);
+  rawSpans.forEach((s, i) => {
+    const appear = easeOut(p(t, 5.6 + i * 0.14, .4));
+    const isX = RAW[i][1];
+    const strike = isX ? easeOut(p(t, 7.5, .4)) : 0;
+    const gone = isX ? easeInOut(p(t, 8.7, .7)) : 0;
+    s.style.opacity = appear * (1 - gone);
+    s.style.color = isX && strike > 0 ? `rgba(255,69,58,${0.55 + strike * 0.45})` : "";
+    s.style.textDecoration = strike > .5 ? "line-through" : "none";
+    s.style.maxWidth = (rawWidths[i] * (1 - gone)) + "px";
+    s.style.marginRight = (0.6 * (1 - gone)) + "ch";
+  });
+  const c = easeOut(p(t, 9.7, .8));
+  raw.style.opacity = 1 - easeOut(p(t, 9.55, .4));
+  $("clean").style.opacity = c;
+  $("clean").style.transform = `translateY(${(1 - c) * 24}px)`;
+
+  // 3 · „This is OpenDictate.“
+  $("s3").style.opacity = vis(t, 11.2, 13.8);
+  rise($("s3a"), t, 11.3, .9, 20);
+  const w = easeOut(p(t, 12.1, 1.3));
+  $("s3b").style.opacity = w;
+  $("s3b").style.letterSpacing = (0.04 - w * 0.085) + "em";
+  $("s3b").style.filter = `blur(${(1 - w) * 14}px)`;
+
+  // 4 · „Hold a key. Speak. Let go. Clean text appears, right where you're typing.“
+  $("s4").style.opacity = vis(t, 13.8, 20.9, .4);
+  const wi = easeOut(p(t, 13.8, .9));
+  $("win").style.transform = `translateY(${(1 - wi) * 60}px) scale(${0.96 + wi * 0.04})`;
+  const down = t >= 14.7 && t < 17.0;
+  $("key").style.opacity = easeOut(p(t, 13.9, .4));
+  $("key").style.transform = `translateY(${down ? 7 : 0}px)`;
+  $("key").style.boxShadow = down ? "0 1px 0 #111, 0 0 0 2px #ff453a inset" : "";
+  $("key").style.color = down ? "#ff453a" : "";
+  const pillOn = t >= 14.7 && t < 17.5;
+  const pk = pillOn ? easeOut(p(t, 14.7, .25)) : 0;
+  $("pill").style.opacity = pk;
+  $("pill").style.transform = `translateY(${(1 - pk) * 16}px)`;
+  const processing = t >= 17.0;
+  $("plabel").textContent = processing ? "Processing" : "Recording";
+  $("pdot").style.background = processing ? "#ff9f0a" : "";
+  [...bars.children].forEach((b, i) => {
+    const talking = !processing && t > 15.3 && t < 16.8;
+    b.style.height = (processing ? 4 : 4 + (talking ? noise(i, t) * 30 : noise(i, t) * 3)) + "px";
+    b.style.opacity = processing ? (Math.floor(t * 6) % 3 === i % 3 ? 1 : .3) : 1;
+  });
+  const saidN = Math.floor(clamp((t - 15.3) / 1.5) * SAID.length);
+  $("said").textContent = t < 17.1 ? SAID.slice(0, saidN) : "";
+  $("said").style.opacity = t < 17.1 ? 1 : 0;
+  const pasted = t >= 17.5;
+  $("input").firstChild.textContent = pasted ? "Yo, what's up in the hood?" : "Message";
+  $("input").firstChild.className = pasted ? "" : "ph";
+  $("caret").style.opacity = Math.floor(t * 2) % 2 ? 1 : 0;
+  $("sent").style.opacity = 0;
+  $("timer").textContent = pasted ? "0.5 s" : "";
+  $("timer").style.opacity = pasted ? easeOut(p(t, 17.5, .3)) : 0;
+
+  // 5 · „In as little as two tenths of a second.“
+  $("s5").style.opacity = vis(t, 20.9, 23.9, .4);
+  const n = easeOut(p(t, 21.6, 1.4));
+  $("s5a").textContent = (0.9 - n * 0.7).toFixed(1) + " s";
+  $("s5a").style.transform = `scale(${0.92 + n * 0.08})`;
+  rise($("s5c"), t, 21.0, .7, 16);
+  rise($("s5b"), t, 22.6, .8, 20);
+
+  // 6 · „It runs entirely on your computer. No account. No subscription. Free, for everyone.“
+  $("s6").style.opacity = vis(t, 23.9, 31.4);
+  rise($("s6a"), t, 24.5);
+  rise($("s6b"), t, 27.1);
+  rise($("s6c"), t, 29.0);
+
+  // 7 · „And it learns the way you write.“
+  $("s7").style.opacity = vis(t, 31.4, 34.6);
+  rise($("s7a"), t, 31.6);
+  rise($("t1"), t, 32.6, .8, 24);
+  rise($("t2"), t, 33.0, .8, 24);
+  rise($("t3"), t, 33.4, .8, 24);
+
+  // 8 · „OpenDictate. Free, and open source.“
+  $("s8").style.opacity = easeOut(p(t, 34.6, .6));
+  const e = easeOut(p(t, 34.7, 1.2));
+  $("s8a").style.opacity = e;
+  $("s8a").style.filter = `blur(${(1 - e) * 12}px)`;
+  rise($("s8b"), t, 35.8, .9, 16);
+  rise($("s8c"), t, 36.8, .9, 12);
+}
+
+window.seek = seek;
+window.DURATION = DURATION;
+window.VO_OFFSET = VO_OFFSET;
+// Zum Anschauen im Browser: läuft in Echtzeit, ?t=12 springt an eine Stelle
+const start = performance.now() - (Number(new URLSearchParams(location.search).get("t")) || 0) * 1000;
+if (!new URLSearchParams(location.search).has("render")) {
+  (function loop() { seek(((performance.now() - start) / 1000) % DURATION); requestAnimationFrame(loop); })();
+} else seek(0);
+</script>
+</body>
+</html>

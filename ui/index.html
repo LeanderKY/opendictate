@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenDictate</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">OpenDictate</div>
+    <a href="#home" data-page="home">Übersicht</a>
+    <a href="#history" data-page="history">Verlauf</a>
+    <a href="#cleaning" data-page="cleaning">Bereinigung</a>
+    <a href="#dictionary" data-page="dictionary">Wörterbuch</a>
+    <a href="#settings" data-page="settings">Einstellungen</a>
+    <div class="side-foot">
+      <div class="status-line"><span class="dot" id="side-dot"></span><span id="side-status">Verbinde …</span></div>
+      <div class="muted small" id="side-hotkey"></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="saved" id="saved">Gespeichert</div>
+
+    <!-- Übersicht -->
+    <section class="page" id="page-home">
+      <header class="page-head">
+        <h1 id="home-title">Verbinde …</h1>
+        <p class="lead" id="home-sub"></p>
+      </header>
+
+      <div class="stats">
+        <div><span class="num" id="st-count">0</span><span class="lbl">Diktate heute</span></div>
+        <div><span class="num" id="st-words">0</span><span class="lbl">Wörter heute</span></div>
+        <div><span class="num" id="st-latency">–</span><span class="lbl">Ø Verarbeitung</span></div>
+      </div>
+
+      <h2>System</h2>
+      <dl class="checks">
+        <dt>Spracherkennung</dt><dd id="ck-whisper">–</dd>
+        <dt>Bereinigung</dt><dd id="ck-llm">–</dd>
+        <dt>Mikrofon</dt><dd id="ck-mic">–</dd>
+      </dl>
+
+      <h2>Zuletzt</h2>
+      <div id="home-recent" class="entries"></div>
+    </section>
+
+    <!-- Verlauf -->
+    <section class="page" id="page-history">
+      <header class="page-head row">
+        <div>
+          <h1>Verlauf</h1>
+          <p class="lead">Wenn etwas falsch bereinigt wurde, klick auf <b>Beibringen</b> und schreib, wie es hätte aussehen sollen. Das wird ein Beispiel, an dem sich das Modell ab jetzt orientiert.</p>
+        </div>
+        <button class="ghost" id="history-clear">Verlauf leeren</button>
+      </header>
+      <div id="history-list" class="entries"></div>
+    </section>
+
+    <!-- Bereinigung -->
+    <section class="page" id="page-cleaning">
+      <header class="page-head">
+        <h1>Bereinigung</h1>
+        <p class="lead">Hier legst du fest, wie aus dem Gesagten Text wird. Verhalten, Regeln und Beispiele gehen bei jedem Diktat ans Modell.</p>
+      </header>
+
+      <h2>Verhalten</h2>
+      <div class="rows">
+        <div class="setting">
+          <div><div class="s-title">Selbstkorrekturen und Wiederholungen</div>
+            <div class="s-desc">„yo, what's up … yo, what's up in the hood“</div></div>
+          <div class="seg" data-key="corrections">
+            <button data-val="last">Nur letzte Fassung</button>
+            <button data-val="keep">Alles behalten</button>
+          </div>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Füllwörter entfernen</div><div class="s-desc">äh, ähm, also, halt, quasi, like</div></div>
+          <label class="switch"><input type="checkbox" data-key="fillers"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Aufzählungen als Liste</div><div class="s-desc">„erstens … zweitens …“ wird zu 1. 2. 3.</div></div>
+          <label class="switch"><input type="checkbox" data-key="lists"><span></span></label>
+        </div>
+      </div>
+
+      <h2>Eigene Regeln</h2>
+      <p class="hint">Eine Regel pro Zeile. Schreib sie so, wie du es einem Menschen erklären würdest. Eigene Regeln haben Vorrang.</p>
+      <textarea id="rules" rows="6" spellcheck="false" placeholder="Wenn ich „neuer Absatz“ sage, mach einen Zeilenumbruch.&#10;Schreib „okay“ immer als „ok“.&#10;Englische Sätze bleiben englisch, deutsche deutsch."></textarea>
+
+      <div class="h2-row">
+        <h2>Beispiele</h2>
+        <button class="ghost" id="ex-add">Beispiel hinzufügen</button>
+      </div>
+      <p class="hint">Beispiele wirken stärker als Regeln und haben das letzte Wort. Links, was du gesagt hast, rechts, was daraus werden soll. Am schnellsten geht's über <a href="#history">Verlauf</a> → Beibringen.</p>
+      <div class="ex-head"><span>Gesagt</span><span>Daraus wird</span><span></span></div>
+      <div id="examples"></div>
+
+      <h2>Ausprobieren</h2>
+      <p class="hint">Tipp hier etwas ein, so wie du es sagen würdest. Ist das Ergebnis falsch, korrigier es direkt im rechten Feld und speicher es als Beispiel.</p>
+      <div class="try">
+        <textarea id="try-in" rows="4" placeholder="also ich wollte äh morgen nein übermorgen …"></textarea>
+        <div class="try-out">
+          <div id="try-out" class="out muted">Ergebnis erscheint hier.</div>
+          <div class="try-bar">
+            <span class="muted small" id="try-meta"></span>
+            <span>
+              <button class="ghost" id="try-save" disabled>Als Beispiel speichern</button>
+              <button class="primary" id="try-run">Bereinigen</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h2>Stil je nach App</h2>
+      <p class="hint">Prozessnamen mit Komma getrennt, z. B. <code>discord.exe</code>. Gilt nur, wenn diese App beim Diktieren im Vordergrund ist.</p>
+      <div id="styles"></div>
+      <button class="ghost" id="style-add">Stil hinzufügen</button>
+      <div class="field top-gap">
+        <label for="default-style">Alle anderen Apps</label>
+        <input id="default-style" type="text">
+      </div>
+    </section>
+
+    <!-- Wörterbuch -->
+    <section class="page" id="page-dictionary">
+      <header class="page-head">
+        <h1>Wörterbuch</h1>
+        <p class="lead">Namen, Marken und Fachbegriffe, die genau so geschrieben werden sollen. Hilft der Spracherkennung und der Bereinigung.</p>
+      </header>
+      <form id="dict-form" class="dict-form">
+        <input id="dict-input" type="text" placeholder="Begriff hinzufügen" autocomplete="off">
+        <button class="primary" type="submit">Hinzufügen</button>
+      </form>
+      <div id="dict-list" class="chips"></div>
+    </section>
+
+    <!-- Einstellungen -->
+    <section class="page" id="page-settings">
+      <header class="page-head"><h1>Einstellungen</h1></header>
+
+      <h2>Aufnahme</h2>
+      <div class="rows">
+        <div class="setting">
+          <div><div class="s-title">Taste zum Diktieren</div><div class="s-desc">Gedrückt halten, sprechen, loslassen</div></div>
+          <button class="hotkey" id="hotkey"></button>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Mikrofon</div></div>
+          <select id="mic"></select>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Töne</div><div class="s-desc">Kurzer Ton bei Start und Ende</div></div>
+          <label class="switch"><input type="checkbox" data-set="sounds"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Anzeige beim Diktieren</div><div class="s-desc">Kleine Leiste unten am Bildschirm</div></div>
+          <label class="switch"><input type="checkbox" data-set="overlay"><span></span></label>
+        </div>
+      </div>
+
+      <h2>Spracherkennung</h2>
+      <div class="rows">
+        <div class="setting">
+          <div><div class="s-title">Sprache</div><div class="s-desc">„Automatisch“, wenn du viel zwischen Deutsch und Englisch wechselst</div></div>
+          <select data-set="whisper.language">
+            <option value="de">Deutsch</option><option value="en">Englisch</option><option value="">Automatisch</option>
+          </select>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Modell</div><div class="s-desc">Wechsel lädt das Modell neu, beim ersten Mal mit Download</div></div>
+          <select data-set="whisper.model">
+            <option value="large-v3-turbo">large-v3-turbo · empfohlen</option>
+            <option value="large-v3">large-v3 · genauer, langsamer</option>
+            <option value="medium">medium</option>
+            <option value="small">small · schnell, ungenauer</option>
+          </select>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Rechnen auf</div></div>
+          <select data-set="whisper.device"><option value="cuda">Grafikkarte</option><option value="cpu">Prozessor</option></select>
+        </div>
+      </div>
+
+      <h2>Bereinigung</h2>
+      <div class="rows">
+        <div class="setting">
+          <div><div class="s-title">Text bereinigen</div><div class="s-desc">Aus: Rohtext der Spracherkennung wird eingefügt</div></div>
+          <label class="switch"><input type="checkbox" data-set="llm.enabled"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Modell</div><div class="s-desc" id="llm-desc">Lokal über Ollama</div></div>
+          <select id="llm-model"></select>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Schnellweg</div><div class="s-desc">Saubere Sätze ohne Füllwörter oder Korrekturen sofort einfügen, ohne Modell. Spart etwa eine halbe Sekunde.</div></div>
+          <label class="switch"><input type="checkbox" data-set="fast_path"><span></span></label>
+        </div>
+      </div>
+
+      <h2>Einfügen</h2>
+      <div class="rows">
+        <div class="setting">
+          <div><div class="s-title">Leerzeichen anhängen</div><div class="s-desc">Damit der nächste Satz nicht am vorigen klebt</div></div>
+          <label class="switch"><input type="checkbox" data-set="trailing_space"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="s-title">Zwischenablage wiederherstellen</div><div class="s-desc">Was du vorher kopiert hattest, bleibt erhalten</div></div>
+          <label class="switch"><input type="checkbox" data-set="restore_clipboard"><span></span></label>
+        </div>
+      </div>
+
+      <div class="danger">
+        <button class="ghost" id="rerun-onboarding">Einrichtung erneut starten</button>
+        <button class="ghost" id="quit">OpenDictate beenden</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="ob" id="onboarding" hidden>
+  <div class="ob-card">
+    <div class="ob-progress"><span id="ob-bar"></span></div>
+    <div class="ob-step-label" id="ob-step-label"></div>
+
+    <section class="ob-step" data-step="0">
+      <h1>Sprich. Es schreibt.</h1>
+      <p class="lead">OpenDictate macht aus deiner Stimme sauberen Text, in jeder App. Halte eine Taste, sprich, lass los.</p>
+      <ul class="ob-facts">
+        <li><b>Läuft auf deinem PC.</b> Keine Cloud, keine Aufnahme verlässt deinen Rechner.</li>
+        <li><b>Kostenlos und Open Source.</b> Kein Konto, kein Abo, keine Limits.</li>
+        <li><b>Lernt deinen Stil.</b> Du zeigst ihm einmal, wie du es willst.</li>
+      </ul>
+      <p class="hint">Die Einrichtung dauert etwa zwei Minuten, plus Download der Modelle beim ersten Mal.</p>
+    </section>
+
+    <section class="ob-step" data-step="1">
+      <h1>Einrichtung</h1>
+      <p class="lead">Wir prüfen deinen PC und wählen passende Modelle. Downloads laufen im Hintergrund weiter, du kannst schon weitermachen.</p>
+      <dl class="ob-checks">
+        <dt>Grafikkarte</dt><dd id="ob-gpu">…</dd>
+        <dt>Spracherkennung</dt><dd id="ob-whisper">…</dd>
+        <dt>Ollama</dt><dd id="ob-ollama">…</dd>
+        <dt>Bereinigung</dt><dd id="ob-llm">…</dd>
+      </dl>
+      <p class="hint" id="ob-llm-skip"><button class="link" id="ob-no-llm">Ohne Bereinigung nutzen</button>: Dann wird der Text so eingefügt, wie die Spracherkennung ihn liefert. Kannst du später jederzeit einschalten.</p>
+    </section>
+
+    <section class="ob-step" data-step="2">
+      <h1>Mikrofon</h1>
+      <p class="lead">Sag etwas. Der Balken sollte sich bewegen.</p>
+      <select id="ob-mic"></select>
+      <div class="meter"><span id="ob-meter"></span></div>
+      <p class="hint" id="ob-mic-hint"></p>
+    </section>
+
+    <section class="ob-step" data-step="3">
+      <h1>Deine Taste</h1>
+      <p class="lead">Diese Taste hältst du gedrückt, solange du sprichst. Strg rechts ist praktisch, weil sie sonst kaum gebraucht wird.</p>
+      <button class="hotkey big" id="ob-hotkey"></button>
+      <p class="hint">Zum Ändern klicken und die neue Taste oder Kombination drücken.</p>
+    </section>
+
+    <section class="ob-step" data-step="4">
+      <h1>Probier's aus</h1>
+      <p class="lead" id="ob-try-lead"></p>
+      <textarea id="ob-try" rows="4" placeholder="Hier landet dein Text."></textarea>
+      <div class="ob-result" id="ob-result" hidden>
+        <div><span class="muted small">Gesagt</span><p id="ob-raw" class="mono"></p></div>
+        <div><span class="muted small">Eingefügt</span><p id="ob-text"></p></div>
+        <p class="hint" id="ob-time"></p>
+      </div>
+    </section>
+
+    <div class="ob-nav">
+      <button class="link" id="ob-skip">Überspringen</button>
+      <span>
+        <button class="ghost" id="ob-back">Zurück</button>
+        <button class="primary" id="ob-next">Weiter</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<template id="tpl-entry">
+  <article class="entry">
+    <div class="entry-meta"><span class="e-time"></span><span class="e-app"></span><span class="e-info"></span></div>
+    <p class="e-text"></p>
+    <p class="e-raw"></p>
+    <div class="entry-actions">
+      <button class="link e-copy">Kopieren</button>
+      <button class="link e-raw-toggle">Gesagt anzeigen</button>
+      <button class="link e-teach">Beibringen</button>
+    </div>
+    <div class="teach" hidden>
+      <label>So hätte es aussehen sollen</label>
+      <textarea rows="3"></textarea>
+      <div class="teach-bar">
+        <button class="ghost e-cancel">Abbrechen</button>
+        <button class="primary e-save">Als Beispiel speichern</button>
+      </div>
+    </div>
+  </article>
+</template>
+
+<script src="app.js"></script>
+<script src="onboarding.js"></script>
+</body>
+</html>

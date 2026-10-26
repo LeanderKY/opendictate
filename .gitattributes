@@ -1,0 +1,4 @@
+* text=auto
+# Batch-Dateien brauchen Windows-Zeilenenden, sonst springen goto-Marken falsch
+*.bat -text
+*.mp3 binary

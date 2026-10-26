@@ -1,0 +1,7 @@
+faster-whisper>=1.1
+av<17
+sounddevice
+numpy
+pyperclip
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*
